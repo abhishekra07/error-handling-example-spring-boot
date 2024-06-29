@@ -45,12 +45,14 @@ public class ApiError {
     }
 
     public void addValidationError(String object, String field, Object rejectedValue, String message) {
-        addSubError(new ApiValidationError(object, field, rejectedValue, message));
+        this.addSubError(new ApiValidationError(object, field, rejectedValue, message));
     }
 
     public void addValidationError(String object, String message) {
-        addSubError(new ApiValidationError(object, message));
+        this.addSubError(new ApiValidationError(object, message));
     }
+
+    public void addVali
 
     public HttpStatus getStatus() {
         return status;
