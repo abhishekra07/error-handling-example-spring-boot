@@ -1,13 +1,17 @@
 package com.codelabs.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import org.hibernate.validator.internal.engine.path.PathImpl;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.CollectionUtils;
 import org.springframework.validation.FieldError;
+import org.springframework.validation.ObjectError;
 
+import javax.validation.ConstraintViolation;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class ApiError {
     private HttpStatus status;
@@ -64,6 +68,29 @@ public class ApiError {
                 fieldError.getRejectedValue(),
                 fieldError.getDefaultMessage())
         );
+    }
+
+    public void addValidationError(List<ObjectError> objectErrors) {
+        objectErrors.forEach(this::addValidationError);
+    }
+
+    private void addValidationError(ObjectError objectError) {
+        this.addSubError(new ApiValidationError(
+                objectError.getObjectName(),
+                objectError.getDefaultMessage()
+        ));
+    }
+
+    private void addValidationError(ConstraintViolation<?> cv) {
+        this.addValidationError(
+                cv.getRootBeanClass().getSimpleName(),
+                String.valueOf(cv.getPropertyPath()),
+                cv.getInvalidValue(),
+                cv.getMessage());
+    }
+
+    public void addValidationErrors(Set<ConstraintViolation<?>> constraintViolations) {
+        constraintViolations.forEach(this::addValidationError);
     }
 
     public HttpStatus getStatus() {
