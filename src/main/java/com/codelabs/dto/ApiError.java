@@ -3,6 +3,7 @@ package com.codelabs.dto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.CollectionUtils;
+import org.springframework.validation.FieldError;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -31,14 +32,14 @@ public class ApiError {
         this.debugMessage = ex.getLocalizedMessage();
     }
 
-    public  ApiError(HttpStatus status, String message, Throwable ex) {
+    public ApiError(HttpStatus status, String message, Throwable ex) {
         this(status);
         this.message = message;
         this.debugMessage = ex.getLocalizedMessage();
     }
 
     public void addSubError(ApiSubError subError) {
-        if(CollectionUtils.isEmpty(subErrors)) {
+        if (CollectionUtils.isEmpty(subErrors)) {
             subErrors = new ArrayList<>();
         }
         subErrors.add(subError);
@@ -52,7 +53,18 @@ public class ApiError {
         this.addSubError(new ApiValidationError(object, message));
     }
 
-    public void addVali
+    public void addValidationErrors(List<FieldError> fieldErrors) {
+        fieldErrors.forEach(this::addValidationError);
+    }
+
+    private void addValidationError(FieldError fieldError) {
+        this.addSubError(new ApiValidationError(
+                fieldError.getObjectName(),
+                fieldError.getField(),
+                fieldError.getRejectedValue(),
+                fieldError.getDefaultMessage())
+        );
+    }
 
     public HttpStatus getStatus() {
         return status;
